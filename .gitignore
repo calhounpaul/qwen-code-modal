@@ -1,0 +1,49 @@
+# Temporary/research data (cloned repos, scraped docs, etc.)
+docs/tmp_data/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Modal
+.modal/
+
+# Models (large files)
+*.gguf
+*.bin
+*.safetensors
+models/
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+*.pem
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Qwen Code settings (user-specific)
+.qwen/
+
+# Claude Code project settings (user-specific)
+.claude/
