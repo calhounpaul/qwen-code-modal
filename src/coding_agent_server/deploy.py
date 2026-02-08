@@ -122,7 +122,7 @@ app = modal.App(APP_NAME)
     max_containers=1,
 )
 @modal.concurrent(max_inputs=MAX_CONCURRENT_INPUTS)
-@modal.web_server(port=VLLM_PORT, startup_timeout=10 * MINUTES)
+@modal.web_server(port=VLLM_PORT, startup_timeout=10 * MINUTES, requires_proxy_auth=True)
 def serve_coder():
     import subprocess
 
@@ -163,7 +163,7 @@ def serve_coder():
     timeout=10 * MINUTES,
 )
 @modal.concurrent(max_inputs=VLM_MAX_CONCURRENT_INPUTS)
-@modal.web_server(port=VLLM_PORT, startup_timeout=10 * MINUTES)
+@modal.web_server(port=VLLM_PORT, startup_timeout=10 * MINUTES, requires_proxy_auth=True)
 def serve_vlm():
     import subprocess
 

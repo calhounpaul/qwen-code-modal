@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 VLM_ENDPOINT = os.environ.get("VLM_ENDPOINT", "")
 VLM_MODEL = os.environ.get("VLM_MODEL", "Qwen/Qwen3-VL-32B-Thinking-FP8")
 VLM_TIMEOUT = float(os.environ.get("VLM_TIMEOUT", "300"))
+MODAL_PROXY_TOKEN_ID = os.environ.get("MODAL_PROXY_TOKEN_ID", "")
+MODAL_PROXY_TOKEN_SECRET = os.environ.get("MODAL_PROXY_TOKEN_SECRET", "")
 
 mcp = FastMCP("vlm-analyzer")
 
@@ -62,11 +64,16 @@ async def _vlm_request(content_blocks: list[dict], max_tokens: int = 2048) -> st
         "max_tokens": max_tokens,
     }
 
+    headers = {"Content-Type": "application/json"}
+    if MODAL_PROXY_TOKEN_ID and MODAL_PROXY_TOKEN_SECRET:
+        headers["Modal-Key"] = MODAL_PROXY_TOKEN_ID
+        headers["Modal-Secret"] = MODAL_PROXY_TOKEN_SECRET
+
     async with httpx.AsyncClient(timeout=VLM_TIMEOUT) as client:
         resp = await client.post(
             f"{VLM_ENDPOINT}/chat/completions",
             json=payload,
-            headers={"Content-Type": "application/json"},
+            headers=headers,
         )
         resp.raise_for_status()
         data = resp.json()

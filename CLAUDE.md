@@ -83,6 +83,7 @@ modal app logs coding-agent-server
 - **Endpoint**: `https://<workspace>--coding-agent-server-serve-coder.modal.run/v1`
 - **Concurrency**: `max_containers=1`, `max_inputs=128` (vLLM handles batching internally)
 - **Features**: Tool calling (`--tool-call-parser qwen3_coder`), FP8 KV cache
+- **Auth**: `requires_proxy_auth=True` — requires `Modal-Key` / `Modal-Secret` headers
 
 ### VLM Endpoint (`serve_vlm`)
 - **Model**: `Qwen/Qwen3-VL-32B-Thinking-FP8`
@@ -90,6 +91,7 @@ modal app logs coding-agent-server
 - **Endpoint**: `https://<workspace>--coding-agent-server-serve-vlm.modal.run/v1`
 - **Concurrency**: `max_inputs=16`
 - **Features**: Multi-image support (`--limit-mm-per-prompt image=5`), 32K context
+- **Auth**: `requires_proxy_auth=True` — requires `Modal-Key` / `Modal-Secret` headers
 
 ### Context/Memory Trade-offs on H200 (141 GiB)
 
@@ -111,6 +113,8 @@ The VLM MCP server (`vlm_mcp_server.py`) runs as a stdio transport server:
 - `VLM_ENDPOINT` — VLM endpoint base URL (required)
 - `VLM_MODEL` — Model name (default: `Qwen/Qwen3-VL-32B-Thinking-FP8`)
 - `VLM_TIMEOUT` — Request timeout in seconds (default: 300)
+- `MODAL_PROXY_TOKEN_ID` — Modal proxy auth token ID (required for authenticated endpoints)
+- `MODAL_PROXY_TOKEN_SECRET` — Modal proxy auth token secret (required for authenticated endpoints)
 
 **Dependencies:** `mcp[cli]`, `httpx`
 

@@ -16,6 +16,8 @@ import pytest
 
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 VLM_ENDPOINT_URL = os.environ.get("VLM_ENDPOINT_URL")
+MODAL_PROXY_TOKEN_ID = os.environ.get("MODAL_PROXY_TOKEN_ID", "")
+MODAL_PROXY_TOKEN_SECRET = os.environ.get("MODAL_PROXY_TOKEN_SECRET", "")
 MODEL_NAME = "unsloth/Qwen3-Coder-Next-FP8-Dynamic"
 VLM_MODEL_NAME = "Qwen/Qwen3-VL-32B-Thinking-FP8"
 TIMEOUT = 600.0  # 10 minutes for cold starts
@@ -31,15 +33,29 @@ skip_no_vlm_endpoint = pytest.mark.skipif(
 )
 
 
+def _auth_headers() -> dict[str, str]:
+    """Build Modal proxy auth headers if credentials are available."""
+    if MODAL_PROXY_TOKEN_ID and MODAL_PROXY_TOKEN_SECRET:
+        return {
+            "Modal-Key": MODAL_PROXY_TOKEN_ID,
+            "Modal-Secret": MODAL_PROXY_TOKEN_SECRET,
+        }
+    return {}
+
+
 @pytest.fixture
 def client():
-    with httpx.Client(base_url=ENDPOINT_URL, timeout=TIMEOUT) as c:
+    with httpx.Client(
+        base_url=ENDPOINT_URL, timeout=TIMEOUT, headers=_auth_headers()
+    ) as c:
         yield c
 
 
 @pytest.fixture
 def vlm_client():
-    with httpx.Client(base_url=VLM_ENDPOINT_URL, timeout=TIMEOUT) as c:
+    with httpx.Client(
+        base_url=VLM_ENDPOINT_URL, timeout=TIMEOUT, headers=_auth_headers()
+    ) as c:
         yield c
 
 

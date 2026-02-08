@@ -13,7 +13,7 @@ Serves as an OpenAI-compatible backend for [qwen-code](https://github.com/QwenLM
 
 ```bash
 cp .env.example .env
-# Edit .env and set MODAL_WORKSPACE to your Modal workspace name
+# Edit .env and set MODAL_WORKSPACE and MODAL_PROXY_TOKEN_ID/SECRET
 ```
 
 ### 2. Deploy
@@ -38,9 +38,11 @@ Installs qwen-code, creates a `qodal` wrapper command pointing at your Modal end
 # Use qwen-code with the Modal backend
 qodal
 
-# Or via the OpenAI-compatible API
+# Or via the OpenAI-compatible API (requires proxy auth headers)
 curl https://YOUR-WORKSPACE--coding-agent-server-serve-coder.modal.run/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "Modal-Key: YOUR_PROXY_TOKEN_ID" \
+  -H "Modal-Secret: YOUR_PROXY_TOKEN_SECRET" \
   -d '{
     "model": "unsloth/Qwen3-Coder-Next-FP8-Dynamic",
     "messages": [{"role": "user", "content": "Write a Python prime checker"}],
@@ -70,7 +72,7 @@ coding-agent-server (Modal App)
 | `serve_coder` | `unsloth/Qwen3-Coder-Next-FP8-Dynamic` | H200 (141 GiB) | 128K | 128 inputs, 1 container |
 | `serve_vlm` | `Qwen/Qwen3-VL-32B-Thinking-FP8` | A100-40GB | 32K | 16 inputs |
 
-Both endpoints use FP8 KV cache, scale to zero after 5 minutes idle, and serve an OpenAI-compatible API.
+Both endpoints use FP8 KV cache, scale to zero after 5 minutes idle, and serve an OpenAI-compatible API. Endpoints require [Modal Proxy Auth](https://modal.com/docs/guide/webhooks#proxy-auth) — requests must include `Modal-Key` and `Modal-Secret` headers.
 
 ### MCP Server
 
@@ -99,6 +101,7 @@ Registered automatically via `./run.sh install`.
 - npm (`sudo apt install npm` on Debian/Ubuntu)
 - [Modal](https://modal.com) account (`pip install modal && modal setup`)
 - Modal workspace with H200 and A100-40GB GPU access
+- Modal Proxy Auth Token (create at Modal dashboard → Settings → Proxy Auth Tokens)
 
 ## License
 

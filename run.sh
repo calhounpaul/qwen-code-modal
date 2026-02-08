@@ -44,6 +44,10 @@ export OPENAI_MODEL="unsloth/Qwen3-Coder-Next-FP8-Dynamic"
 export VLM_BASE_URL="https://${MODAL_WORKSPACE}--coding-agent-server-serve-vlm.modal.run/v1"
 export VLM_MODEL="Qwen/Qwen3-VL-32B-Thinking-FP8"
 
+# Proxy auth tokens (required for authenticated endpoints)
+export MODAL_PROXY_TOKEN_ID="${MODAL_PROXY_TOKEN_ID:-}"
+export MODAL_PROXY_TOKEN_SECRET="${MODAL_PROXY_TOKEN_SECRET:-}"
+
 # --- Dispatch command ---
 
 CMD="${1:-help}"
@@ -123,6 +127,8 @@ vlm_endpoint = '$VLM_BASE_URL'
 vlm_model = '$VLM_MODEL'
 mcp_script = '$MCP_SERVER_SCRIPT'
 venv_python = '$VENV_PYTHON'
+proxy_token_id = '$MODAL_PROXY_TOKEN_ID'
+proxy_token_secret = '$MODAL_PROXY_TOKEN_SECRET'
 
 # Load existing or start fresh
 if os.path.exists(settings_file):
@@ -133,19 +139,36 @@ else:
 
 # Add/update mcpServers entry (merge, don't clobber)
 mcp_servers = d.setdefault('mcpServers', {})
+mcp_env = {
+    'VLM_ENDPOINT': vlm_endpoint,
+    'VLM_MODEL': vlm_model,
+}
+if proxy_token_id and proxy_token_secret:
+    mcp_env['MODAL_PROXY_TOKEN_ID'] = proxy_token_id
+    mcp_env['MODAL_PROXY_TOKEN_SECRET'] = proxy_token_secret
 mcp_servers['vlm-analyzer'] = {
     'command': venv_python,
     'args': [mcp_script],
-    'env': {
-        'VLM_ENDPOINT': vlm_endpoint,
-        'VLM_MODEL': vlm_model,
-    },
+    'env': mcp_env,
 }
+
+# Add customHeaders for Modal proxy auth (used by qwen-code OpenAI client)
+if proxy_token_id and proxy_token_secret:
+    model_config = d.setdefault('model', {})
+    gen_config = model_config.setdefault('generationConfig', {})
+    gen_config['customHeaders'] = {
+        'Modal-Key': proxy_token_id,
+        'Modal-Secret': proxy_token_secret,
+    }
 
 with open(settings_file, 'w') as f:
     json.dump(d, f, indent=2)
 
 print(f'Registered vlm-analyzer MCP server in {settings_file}')
+if proxy_token_id and proxy_token_secret:
+    print('Configured Modal proxy auth headers in customHeaders')
+else:
+    print('WARNING: MODAL_PROXY_TOKEN_ID/SECRET not set — proxy auth headers not configured')
 "
 
         echo ""
@@ -160,6 +183,8 @@ print(f'Registered vlm-analyzer MCP server in {settings_file}')
     test)
         ENDPOINT_URL="https://${MODAL_WORKSPACE}--coding-agent-server-serve-coder.modal.run" \
         VLM_ENDPOINT_URL="https://${MODAL_WORKSPACE}--coding-agent-server-serve-vlm.modal.run" \
+        MODAL_PROXY_TOKEN_ID="$MODAL_PROXY_TOKEN_ID" \
+        MODAL_PROXY_TOKEN_SECRET="$MODAL_PROXY_TOKEN_SECRET" \
             "$VENV_DIR/bin/python" -m pytest "$SCRIPT_DIR/tests/test_health.py" -v "$@"
         ;;
     env)
@@ -169,6 +194,8 @@ print(f'Registered vlm-analyzer MCP server in {settings_file}')
         echo "VLM_BASE_URL=$VLM_BASE_URL"
         echo "VLM_MODEL=$VLM_MODEL"
         echo "MODAL_WORKSPACE=$MODAL_WORKSPACE"
+        echo "MODAL_PROXY_TOKEN_ID=$MODAL_PROXY_TOKEN_ID"
+        echo "MODAL_PROXY_TOKEN_SECRET=${MODAL_PROXY_TOKEN_SECRET:+(set)}"
         ;;
     shell)
         echo "Activating venv with Modal endpoint env vars..."
