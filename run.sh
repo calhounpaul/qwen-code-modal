@@ -69,6 +69,13 @@ case "$CMD" in
         "$VENV_DIR/bin/modal" app logs coding-agent-server "$@"
         ;;
     install)
+        # Ensure npm is available (qwen-code installer requires it)
+        if ! command -v npm &>/dev/null; then
+            echo "Error: npm is required but not installed." >&2
+            echo "Install it with: sudo apt install npm" >&2
+            exit 1
+        fi
+
         # Install qwen-code if needed
         if ! command -v qwen &>/dev/null; then
             echo "Installing qwen-code..."

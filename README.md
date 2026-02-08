@@ -97,6 +97,7 @@ Registered automatically via `./run.sh install`.
 ## Requirements
 
 - Python 3.10+
+- npm (`sudo apt install npm` on Debian/Ubuntu)
 - [Modal](https://modal.com) account (`pip install modal && modal setup`)
 - Modal workspace with H200 and A100-40GB GPU access
 
