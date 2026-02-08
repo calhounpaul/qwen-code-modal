@@ -102,7 +102,7 @@ EOF
         # Install MCP server dependencies into project venv
         echo ""
         echo "Installing VLM MCP server dependencies..."
-        "$VENV_DIR/bin/pip" install --quiet "mcp[cli]" httpx pillow
+        "$VENV_DIR/bin/pip" install --quiet "mcp[cli]" httpx
 
         # Register vlm-analyzer MCP server in qwen-code settings
         echo "Registering vlm-analyzer MCP server..."

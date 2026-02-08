@@ -33,9 +33,8 @@ coding-agent-server (Modal App)
 
 Model weights are downloaded during image build via `.run_function()` and baked directly into the container images for fast cold starts. Scales to zero after 5 min idle.
 
-**MCP server** (`vlm_mcp_server.py`): FastMCP stdio server with three tools:
+**MCP server** (`vlm_mcp_server.py`): FastMCP stdio server with two tools:
 - `analyze_image` — Analyze a local image file
-- `analyze_screenshot` — Capture and analyze current screen
 - `compare_images` — Compare 2-5 images
 
 Registered in `~/.qwen/settings.json` under `mcpServers.vlm-analyzer` via `./run.sh install`.
@@ -106,7 +105,6 @@ The VLM MCP server (`vlm_mcp_server.py`) runs as a stdio transport server:
 
 **Tools:**
 - `analyze_image(image_path, prompt)` — Read and analyze a local image
-- `analyze_screenshot(prompt)` — Capture screen and analyze
 - `compare_images(image_paths, prompt)` — Compare 2-5 images
 
 **Env vars:**
@@ -114,7 +112,7 @@ The VLM MCP server (`vlm_mcp_server.py`) runs as a stdio transport server:
 - `VLM_MODEL` — Model name (default: `Qwen/Qwen3-VL-32B-Thinking-FP8`)
 - `VLM_TIMEOUT` — Request timeout in seconds (default: 300)
 
-**Dependencies:** `mcp[cli]`, `httpx`, `pillow`
+**Dependencies:** `mcp[cli]`, `httpx`
 
 ## Qwen Code Integration
 
@@ -125,6 +123,11 @@ This package installs qwen-code and configures it to:
 4. Register `vlm-analyzer` MCP server for image analysis
 
 Telemetry disable is enforced in `scripts/install_qwen_code.sh` and should be enforced in any Python install scripts.
+
+## Development Rules
+
+- **No fallbacks or fake data.** Never deploy stub endpoints, mock responses, placeholder models, or dummy data. Every feature must work end-to-end against the real Modal deployment before it ships. If a dependency isn't available yet, don't merge the code that depends on it.
+- **No tools that can't work in the target environment.** This runs headless (CLI/SSH). Don't add features that require a display server, GUI session, or browser unless there is a real runtime that provides them.
 
 ## Future Plans (not yet implemented)
 

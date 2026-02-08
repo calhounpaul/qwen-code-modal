@@ -77,7 +77,6 @@ Both endpoints use FP8 KV cache, scale to zero after 5 minutes idle, and serve a
 The VLM MCP server (`vlm_mcp_server.py`) provides image analysis tools for qwen-code:
 
 - **`analyze_image`** — Analyze a local image file
-- **`analyze_screenshot`** — Capture and analyze the current screen
 - **`compare_images`** — Compare 2-5 images side by side
 
 Registered automatically via `./run.sh install`.

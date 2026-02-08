@@ -44,7 +44,7 @@ Deploy `Qwen/Qwen3-VL-32B-Thinking-FP8` on A100-40GB for image analysis, with an
 - A100-40GB: 17 GiB FP8 weights, ~19 GiB for KV cache
 - `--limit-mm-per-prompt image=5` (max 5 images per request)
 - No tool calling (VLM is text+image only)
-- MCP tools: `analyze_image`, `analyze_screenshot`, `compare_images`
+- MCP tools: `analyze_image`, `compare_images`
 
 ---
 

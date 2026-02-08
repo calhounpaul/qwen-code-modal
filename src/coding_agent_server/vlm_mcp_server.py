@@ -90,29 +90,6 @@ async def analyze_image(image_path: str, prompt: str) -> str:
 
 
 @mcp.tool()
-async def analyze_screenshot(prompt: str) -> str:
-    """Capture the current screen and analyze it with a text prompt.
-
-    Args:
-        prompt: Question or instruction about the screenshot.
-    """
-    from io import BytesIO
-
-    from PIL import ImageGrab
-
-    img = ImageGrab.grab()
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    data = base64.b64encode(buf.getvalue()).decode("ascii")
-
-    content = [
-        _image_content_block("image/png", data),
-        {"type": "text", "text": prompt},
-    ]
-    return await _vlm_request(content)
-
-
-@mcp.tool()
 async def compare_images(image_paths: list[str], prompt: str) -> str:
     """Compare 2-5 local images with a text prompt.
 
