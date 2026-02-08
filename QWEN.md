@@ -5,7 +5,7 @@
 This is a **Modal-deployed vLLM inference server** that hosts two AI models for AI-assisted coding:
 
 1. **Qwen3-Coder-Next** (80B MoE, FP8 quantized) on H200 GPU — primary coding LLM with tool calling support
-2. **Qwen3-VL-32B-Thinking** (32B dense, FP8 quantized) on A100-40GB — vision-language model for image analysis
+2. **Qwen3-VL-32B-Thinking** (32B dense, FP8 quantized) on A100-80GB — vision-language model for image analysis
 
 The server exposes an **OpenAI-compatible API** and serves as:
 - A fallback coding LLM for **Claude Code**
@@ -28,12 +28,12 @@ The server exposes an **OpenAI-compatible API** and serves as:
 │   └── __init__.py
 ├── tests/
 │   ├── __init__.py
-│   └── test_health.py         # Health check pytest tests for both endpoints
+│   ├── test_health.py         # Health check pytest tests for both endpoints
+│   └── test_vlm_mcp.py        # VLM MCP tool tests with generated vector images
 ├── scripts/
 │   └── install_qwen_code.sh   # Install qwen-code CLI + disable telemetry
 ├── .env.example               # Environment variable template
 ├── run.sh                     # All-in-one CLI for deploy/install/test
-├── run.sh                     # Main entry point script
 ├── .gitignore
 ├── LICENSE
 ├── README.md
@@ -48,7 +48,7 @@ The server exposes an **OpenAI-compatible API** and serves as:
 - Python 3.10+ (project uses Python 3.12 in Docker image)
 - npm (required for qwen-code installation)
 - Modal account (`pip install modal && modal setup`)
-- Modal workspace with H200 and A100-40GB GPU access
+- Modal workspace with H200 and A100-80GB GPU access
 
 ### Configuration
 
@@ -106,6 +106,31 @@ MODAL_PROXY_TOKEN_SECRET=... \
     pytest tests/test_health.py -v
 ```
 
+### VLM MCP Tool Tests
+
+Tests for the VLM MCP tools (`test_vlm_mcp.py`) generate temporary vector images and test the VLM endpoint:
+
+- **Triangle images** - Random triangles with configurable colors
+- **Suit symbols** - Playing card suits (♣, ♦, ♥, ♠)
+- **Color blocks** - Solid color blocks for color recognition
+- **Wingdings-style symbols** - Checkmarks, crosses, stars, hearts, arrows, etc.
+
+**Requirements:**
+```bash
+pip install pytest-asyncio pillow
+```
+
+**Usage:**
+```bash
+VLM_ENDPOINT_URL="https://WORKSPACE--coding-agent-server-serve-vlm.modal.run" \
+VLM_MODEL="Qwen/Qwen3-VL-32B-Thinking-FP8" \
+MODAL_PROXY_TOKEN_ID=YOUR_TOKEN_ID \
+MODAL_PROXY_TOKEN_SECRET=YOUR_TOKEN_SECRET \
+    pytest tests/test_vlm_mcp.py -v
+```
+
+The tests use the same `_vlm_request()` function as the MCP server to send requests to the Modal VLM endpoint.
+
 ### Usage
 
 ```bash
@@ -148,7 +173,7 @@ curl https://YOUR-WORKSPACE--coding-agent-server-serve-coder.modal.run/v1/chat/c
 | Setting | Value |
 |---------|-------|
 | **Model** | `Qwen/Qwen3-VL-32B-Thinking-FP8` |
-| **GPU** | A100-40GB |
+| **GPU** | A100-80GB |
 | **Context** | 32K tokens |
 | **Concurrency** | 16 inputs |
 | **Scale-down** | 5 min idle |
@@ -192,7 +217,7 @@ The VLM MCP server (`vlm_mcp_server.py`) provides:
 
 ### Model Configuration (`config.py`)
 - Coder: H200, 128K context, 128 max inputs, FP8 KV cache, tool calling enabled
-- VLM: A100-40GB, 32K context, 16 max inputs, FP8 KV cache, max 5 images
+- VLM: A100-80GB (~34 GiB FP8 weights), 32K context, 16 max inputs, FP8 KV cache, max 5 images
 
 ### Deployment (`deploy.py`)
 - Two `@app.function` entries with `@modal.web_server`
@@ -212,6 +237,11 @@ The VLM MCP server (`vlm_mcp_server.py`) provides:
 - aiohttp (for smoke tests)
 - httpx (for MCP server)
 - mcp (for MCP stdio transport)
+
+**Test deps:**
+- pytest (for test framework)
+- pytest-asyncio (for async test support)
+- pillow (for generating test images)
 
 **System deps:**
 - npm (for qwen-code installation)

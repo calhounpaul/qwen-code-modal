@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **coding-agent-server** is a Modal-deployed vLLM inference server hosting two models:
 1. `unsloth/Qwen3-Coder-Next-FP8-Dynamic` (80B MoE, 3B active params, 256K context) — coding LLM on H200
-2. `Qwen/Qwen3-VL-32B-Thinking-FP8` (32B dense, FP8) — vision-language model on A100-40GB
+2. `Qwen/Qwen3-VL-32B-Thinking-FP8` (32B dense, FP8) — vision-language model on A100-80GB
 
 It serves as a fallback coding LLM for Claude Code via an OpenAI-compatible API, with an MCP server for VLM image analysis.
 
@@ -18,7 +18,7 @@ The project also installs **qwen-code** locally as a CLI coding agent backed by 
 coding-agent-server (Modal App)
 ├── src/
 │   └── coding_agent_server/
-│       ├── deploy.py              # Modal app: serve_coder (H200) + serve_vlm (A100-40GB)
+│       ├── deploy.py              # Modal app: serve_coder (H200) + serve_vlm (A100-80GB)
 │       ├── config.py              # Model/GPU/scaling configuration
 │       └── vlm_mcp_server.py      # MCP stdio server for VLM image analysis
 ├── scripts/
@@ -29,7 +29,7 @@ coding-agent-server (Modal App)
 
 **Modal deployment**: Two `@app.function` entries with `@modal.web_server`, each running vLLM:
 - **`serve_coder`** — H200, FP8 coder model, tool calling enabled, `max_containers=1` (vLLM handles batching)
-- **`serve_vlm`** — A100-40GB, FP8 VLM, image support via `--limit-mm-per-prompt image=5`
+- **`serve_vlm`** — A100-80GB, FP8 VLM, image support via `--limit-mm-per-prompt image=5`
 
 Model weights are downloaded during image build via `.run_function()` and baked directly into the container images for fast cold starts. Scales to zero after 5 min idle.
 
@@ -87,7 +87,7 @@ modal app logs coding-agent-server
 
 ### VLM Endpoint (`serve_vlm`)
 - **Model**: `Qwen/Qwen3-VL-32B-Thinking-FP8`
-- **GPU**: A100-40GB (~17 GiB FP8 weights, ~19 GiB for KV cache)
+- **GPU**: A100-80GB (~34 GiB FP8 weights, ~38 GiB for KV cache)
 - **Endpoint**: `https://<workspace>--coding-agent-server-serve-vlm.modal.run/v1`
 - **Concurrency**: `max_inputs=16`
 - **Features**: Multi-image support (`--limit-mm-per-prompt image=5`), 32K context

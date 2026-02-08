@@ -7,6 +7,10 @@ Usage:
     ENDPOINT_URL="https://WORKSPACE--coding-agent-server-serve-coder.modal.run" \
     VLM_ENDPOINT_URL="https://WORKSPACE--coding-agent-server-serve-vlm.modal.run" \
         pytest tests/test_health.py -v
+
+Requirements:
+    - pytest-asyncio (pip install pytest-asyncio) - for async test support
+    - httpx (pip install httpx) - for HTTP client
 """
 
 import os

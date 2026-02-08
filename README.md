@@ -3,7 +3,7 @@
 Modal-deployed vLLM inference server hosting two models for AI-assisted coding:
 
 1. **Qwen3-Coder-Next** (80B MoE, FP8) on H200 — coding LLM with tool calling
-2. **Qwen3-VL-32B-Thinking** (32B dense, FP8) on A100-40GB — vision-language model for image analysis
+2. **Qwen3-VL-32B-Thinking** (32B dense, FP8) on A100-80GB — vision-language model for image analysis
 
 Serves as an OpenAI-compatible backend for [qwen-code](https://github.com/QwenLM/qwen-code) and as a fallback coding LLM for Claude Code. Scales to zero when idle.
 
@@ -22,7 +22,7 @@ cp .env.example .env
 ./run.sh deploy
 ```
 
-This deploys both endpoints to Modal. First deploy builds container images with baked-in model weights (~78 GiB coder + ~17 GiB VLM).
+This deploys both endpoints to Modal. First deploy builds container images with baked-in model weights (~78 GiB coder + ~34 GiB VLM).
 
 ### 3. Install qwen-code CLI
 
@@ -55,7 +55,7 @@ curl https://YOUR-WORKSPACE--coding-agent-server-serve-coder.modal.run/v1/chat/c
 ```
 coding-agent-server (Modal App)
 ├── src/coding_agent_server/
-│   ├── deploy.py              # Modal app: serve_coder (H200) + serve_vlm (A100-40GB)
+│   ├── deploy.py              # Modal app: serve_coder (H200) + serve_vlm (A100-80GB)
 │   ├── config.py              # Model/GPU/scaling configuration
 │   └── vlm_mcp_server.py      # MCP stdio server for VLM image analysis
 ├── scripts/
@@ -70,7 +70,7 @@ coding-agent-server (Modal App)
 | Endpoint | Model | GPU | Context | Concurrency |
 |----------|-------|-----|---------|-------------|
 | `serve_coder` | `unsloth/Qwen3-Coder-Next-FP8-Dynamic` | H200 (141 GiB) | 128K | 128 inputs, 1 container |
-| `serve_vlm` | `Qwen/Qwen3-VL-32B-Thinking-FP8` | A100-40GB | 32K | 16 inputs |
+| `serve_vlm` | `Qwen/Qwen3-VL-32B-Thinking-FP8` | A100-80GB | 32K | 16 inputs |
 
 Both endpoints use FP8 KV cache, scale to zero after 5 minutes idle, and serve an OpenAI-compatible API. Endpoints require [Modal Proxy Auth](https://modal.com/docs/guide/webhooks#proxy-auth) — requests must include `Modal-Key` and `Modal-Secret` headers.
 
@@ -100,7 +100,7 @@ Registered automatically via `./run.sh install`.
 - Python 3.10+
 - npm (`sudo apt install npm` on Debian/Ubuntu)
 - [Modal](https://modal.com) account (`pip install modal && modal setup`)
-- Modal workspace with H200 and A100-40GB GPU access
+- Modal workspace with H200 and A100-80GB GPU access
 - Modal Proxy Auth Token (create at Modal dashboard → Settings → Proxy Auth Tokens)
 
 ## License

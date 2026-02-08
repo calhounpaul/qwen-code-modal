@@ -29,7 +29,7 @@ VLLM_PORT = 8000
 
 VLM_MODEL_NAME = "Qwen/Qwen3-VL-32B-Thinking-FP8"
 VLM_MODEL_DIR = "/vlm-model"
-VLM_GPU_TYPE = "A100-40GB"
+VLM_GPU_TYPE = "A100-80GB"
 VLM_N_GPU = 1
 VLM_MAX_MODEL_LEN = 32768
 VLM_GPU_MEMORY_UTILIZATION = 0.90
@@ -153,7 +153,7 @@ def serve_coder():
     ]
 
     print("Starting vLLM:", *cmd)
-    subprocess.Popen(" ".join(cmd), shell=True)
+    subprocess.Popen(cmd)
 
 
 @app.function(
@@ -186,14 +186,14 @@ def serve_vlm():
         "--kv-cache-dtype",
         KV_CACHE_DTYPE,
         "--limit-mm-per-prompt",
-        "image=5",
+        '{"image":5}',
         "--trust-remote-code",
         "--enforce-eager",
         "--disable-log-requests",
     ]
 
     print("Starting vLLM (VLM):", *cmd)
-    subprocess.Popen(" ".join(cmd), shell=True)
+    subprocess.Popen(cmd)
 
 
 # --- Local entrypoint (smoke test via `modal run`) ---
