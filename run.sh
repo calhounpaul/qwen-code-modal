@@ -14,13 +14,6 @@ if [ ! -d "$VENV_DIR" ]; then
     echo "Venv ready."
 fi
 
-# --- Ensure modal token exists ---
-
-if ! "$VENV_DIR/bin/modal" token list &>/dev/null; then
-    echo "No Modal token found. Launching authentication..."
-    "$VENV_DIR/bin/modal" token new
-fi
-
 # --- Load .env if present ---
 
 if [ -f "$SCRIPT_DIR/.env" ]; then
@@ -56,16 +49,26 @@ export VLM_MODEL="Qwen/Qwen3-VL-32B-Thinking-FP8"
 CMD="${1:-help}"
 shift 2>/dev/null || true
 
+ensure_modal_token() {
+    if ! "$VENV_DIR/bin/modal" token list &>/dev/null; then
+        echo "No Modal token found. Launching authentication..."
+        "$VENV_DIR/bin/modal" token new
+    fi
+}
+
 case "$CMD" in
     deploy)
+        ensure_modal_token
         echo "Deploying coding-agent-server..."
         "$VENV_DIR/bin/modal" deploy "$SCRIPT_DIR/src/coding_agent_server/deploy.py" "$@"
         ;;
     smoke)
+        ensure_modal_token
         echo "Running smoke test (modal run)..."
         "$VENV_DIR/bin/modal" run "$SCRIPT_DIR/src/coding_agent_server/deploy.py" "$@"
         ;;
     logs)
+        ensure_modal_token
         "$VENV_DIR/bin/modal" app logs coding-agent-server "$@"
         ;;
     install)
