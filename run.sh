@@ -54,13 +54,18 @@ CMD="${1:-help}"
 shift 2>/dev/null || true
 
 ensure_modal_token() {
-    if ! "$VENV_DIR/bin/modal" token list &>/dev/null; then
+    if ! "$VENV_DIR/bin/modal" token info &>/dev/null; then
         echo "No Modal token found. Launching authentication..."
         "$VENV_DIR/bin/modal" token new
     fi
 }
 
 case "$CMD" in
+    download-models)
+        ensure_modal_token
+        echo "Downloading model weights to Modal Volume..."
+        "$VENV_DIR/bin/modal" run "$SCRIPT_DIR/scripts/download_models.py" "$@"
+        ;;
     deploy)
         ensure_modal_token
         echo "Deploying coding-agent-server..."
@@ -206,14 +211,19 @@ else:
         echo "Usage: ./run.sh <command>"
         echo ""
         echo "Commands:"
-        echo "  install  Install qwen-code + 'qodal' wrapper + VLM MCP server"
-        echo "  deploy   Deploy the server to Modal (coder + VLM)"
-        echo "  smoke    Run smoke test via modal run"
-        echo "  logs     Tail Modal app logs"
-        echo "  qwen     Launch qwen-code CLI with endpoint configured"
-        echo "  test     Run pytest health checks against live endpoints"
-        echo "  env      Print configured env vars (coder + VLM)"
-        echo "  shell    Start Python with venv + env vars"
+        echo "  download-models  Download model weights to Modal Volume (run first)"
+        echo "  deploy           Deploy the server to Modal (coder + VLM)"
+        echo "  install          Install qwen-code + 'qodal' wrapper + VLM MCP server"
+        echo "  smoke            Run smoke test via modal run"
+        echo "  logs             Tail Modal app logs"
+        echo "  qwen             Launch qwen-code CLI with endpoint configured"
+        echo "  test             Run pytest health checks against live endpoints"
+        echo "  env              Print configured env vars (coder + VLM)"
+        echo "  shell            Start Python with venv + env vars"
+        echo ""
+        echo "First-time setup:"
+        echo "  ./run.sh download-models   # download weights to volume (CPU-only)"
+        echo "  ./run.sh deploy            # deploy server (mounts volume, no download)"
         echo ""
         echo "Config: set MODAL_WORKSPACE in .env or environment"
         ;;
