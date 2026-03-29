@@ -99,11 +99,17 @@ auth['baseUrl'] = endpoint_url
 auth['apiKey'] = 'EMPTY'
 
 # Configure VLM MCP server (disabled for multimodal models)
+# Handle both 'mcpServers' (old) and 'mcp_servers' (new) keys
 if is_multimodal:
-    d.setdefault('mcp_servers', {}).pop('vlm-analyzer', None)
+    # Remove from both possible keys
+    d.get('mcp_servers', {}).pop('vlm-analyzer', None)
+    d.get('mcpServers', {}).pop('vlm-analyzer', None)
     print('Note: VLM MCP server disabled (built-in multimodal model detected)')
 else:
-    d.setdefault('mcp_servers', {})['vlm-analyzer'] = {
+    # Add to 'mcpServers' key (qwen-code uses this format)
+    if 'mcpServers' not in d:
+        d['mcpServers'] = {}
+    d['mcpServers']['vlm-analyzer'] = {
         'command': 'python3',
         'args': ['$PROJECT_DIR/src/coding_agent_server/vlm_mcp_server.py'],
         'env': {
