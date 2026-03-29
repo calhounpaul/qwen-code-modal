@@ -34,7 +34,7 @@ The server exposes an **OpenAI-compatible API** and serves as:
 ## Project Structure
 
 ```
-/home/paul/projects/qwen-code-modal/
+<project-root>/
 ├── src/coding_agent_server/
 │   ├── deploy.py              # Modal app with serve_coder (conditional A100) + serve_vlm (conditional)
 │   ├── config.py              # Configuration constants (models, GPUs, scaling, model selection)

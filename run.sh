@@ -39,7 +39,7 @@ fi
 
 export OPENAI_BASE_URL="https://${MODAL_WORKSPACE}--coding-agent-server-serve-coder.modal.run/v1"
 export OPENAI_API_KEY="${OPENAI_API_KEY:-EMPTY}"
-export OPENAI_MODEL="unsloth/Qwen3-Coder-Next-FP8-Dynamic"
+export OPENAI_MODEL="${CODER_MODEL_NAME:-unsloth/Qwen3.5-397B-A17B-GGUF}"
 
 export VLM_BASE_URL="https://${MODAL_WORKSPACE}--coding-agent-server-serve-vlm.modal.run/v1"
 export VLM_MODEL="Qwen/Qwen3-VL-32B-Thinking-FP8"

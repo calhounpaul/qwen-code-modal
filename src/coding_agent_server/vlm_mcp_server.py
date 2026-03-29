@@ -4,6 +4,7 @@ Runs as a stdio MCP server. Configure via env vars:
   VLM_ENDPOINT  - Base URL of the VLM endpoint (e.g. https://WORKSPACE--coding-agent-server-serve-vlm.modal.run/v1)
   VLM_MODEL     - Model name (default: Qwen/Qwen3-VL-32B-Thinking-FP8)
   VLM_TIMEOUT   - Request timeout in seconds (default: 300)
+  ENABLE_VLM_MCP - Set to "0" to disable the MCP server (default: "1")
 
 Usage:
   VLM_ENDPOINT="https://..." python src/coding_agent_server/vlm_mcp_server.py
@@ -13,10 +14,19 @@ import base64
 import logging
 import mimetypes
 import os
+import sys
 from pathlib import Path
 
 import httpx
 from mcp.server.fastmcp import FastMCP
+
+# Check if VLM MCP should be enabled (disabled for multimodal models)
+ENABLE_VLM_MCP = os.environ.get("ENABLE_VLM_MCP", "1").lower() not in ("0", "false", "no")
+
+if not ENABLE_VLM_MCP:
+    logger = logging.getLogger(__name__)
+    logger.warning("VLM MCP server disabled - Qwen3.5 multimodal model is being used")
+    sys.exit(0)
 
 # Logging to stderr only — stdout is reserved for stdio transport
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
